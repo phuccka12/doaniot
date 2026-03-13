@@ -1,0 +1,26 @@
+# Firebase Integration
+firebase-admin>=7.0.0
+google-cloud-firestore>=2.21.0
+
+# Telegram Bot API
+requests>=2.31.0
+python-telegram-bot>=20.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Scheduling (optional)
+schedule>=1.2.0
+
+# Data Processing (optional)
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Logging (optional)
+python-json-logger>=2.0.7
+
+# MQTT (if connecting to IoT devices - optional)
+paho-mqtt>=1.6.1
+
+# Serial Communication (for direct device connection - optional)
+pyserial>=3.5

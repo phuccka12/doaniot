@@ -1,0 +1,313 @@
+[2026-03-13 11:38:14,815] INFO - ============================================================
+[2026-03-13 11:38:14,838] INFO - ============================================================
+[2026-03-13 11:38:14,841] INFO - ============================================================
+[2026-03-13 11:38:40,644] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:38:56,363] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:39:00,296] INFO - ============================================================
+[2026-03-13 11:39:00,296] INFO - [BOT] IOT HEALTH MONITORING BOT (TEST MODE)
+[2026-03-13 11:39:00,296] INFO - ============================================================
+[2026-03-13 11:39:00,296] INFO - [CONFIG]
+[2026-03-13 11:39:00,296] INFO -    - Thiet bi: phuc_dev, user_001
+[2026-03-13 11:39:00,298] INFO -    - Cap nhat moi: 5s
+[2026-03-13 11:39:00,298] INFO -    - Telegram Bot: [OK] Ket noi
+[2026-03-13 11:39:00,298] INFO - ============================================================
+[2026-03-13 11:39:00,298] INFO - [DATA] phuc_dev: HR=100 SpO2=98% Fall=False
+[2026-03-13 11:39:00,298] INFO - [START] Monitoring started. Press Ctrl+C to stop.
+[2026-03-13 11:39:00,299] INFO - [DATA] user_001: HR=90 SpO2=96% Fall=False
+[2026-03-13 11:39:02,100] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:39:05,301] INFO - [DATA] phuc_dev: HR=101 SpO2=99% Fall=False
+[2026-03-13 11:39:05,301] INFO - [DATA] user_001: HR=94 SpO2=96% Fall=False
+[2026-03-13 11:39:07,806] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:39:10,302] INFO - [DATA] phuc_dev: HR=101 SpO2=99% Fall=False
+[2026-03-13 11:39:10,302] INFO - [DATA] user_001: HR=90 SpO2=97% Fall=False
+[2026-03-13 11:39:13,525] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:39:15,314] INFO - [DATA] phuc_dev: HR=97 SpO2=99% Fall=False
+[2026-03-13 11:39:15,314] INFO - [DATA] user_001: HR=95 SpO2=98% Fall=False
+[2026-03-13 11:39:19,287] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:39:20,329] INFO - [DATA] phuc_dev: HR=93 SpO2=99% Fall=False
+[2026-03-13 11:39:20,329] INFO - [DATA] user_001: HR=100 SpO2=98% Fall=False
+[2026-03-13 11:39:21,063] INFO - [STOP] Bot stopped
+[2026-03-13 11:39:25,002] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:39:45,763] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:39:51,490] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:39:57,208] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:40:07,931] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:40:08,325] INFO - ============================================================
+[2026-03-13 11:40:08,326] INFO - [BOT] IOT HEALTH MONITORING BOT (TEST MODE)
+[2026-03-13 11:40:08,326] INFO - ============================================================
+[2026-03-13 11:40:08,326] INFO - [CONFIG]
+[2026-03-13 11:40:08,326] INFO -    - Thiet bi: phuc_dev, user_001
+[2026-03-13 11:40:08,326] INFO -    - Cap nhat moi: 5s
+[2026-03-13 11:40:08,326] INFO -    - Telegram Bot: [OK] Ket noi
+[2026-03-13 11:40:08,326] INFO - ============================================================
+[2026-03-13 11:40:08,326] INFO - [DATA] phuc_dev: HR=78 SpO2=98% Fall=False
+[2026-03-13 11:40:08,326] INFO - [START] Monitoring started. Press Ctrl+C to stop.
+[2026-03-13 11:40:08,326] INFO - [DATA] user_001: HR=98 SpO2=97% Fall=False
+[2026-03-13 11:40:13,331] INFO - [DATA] phuc_dev: HR=73 SpO2=98% Fall=False
+[2026-03-13 11:40:13,332] INFO - [DATA] user_001: HR=95 SpO2=98% Fall=False
+[2026-03-13 11:40:13,659] WARNING - Alert sent: SpO2 low for user_001
+[2026-03-13 11:40:18,342] INFO - [DATA] phuc_dev: HR=77 SpO2=98% Fall=False
+[2026-03-13 11:40:18,342] INFO - [DATA] user_001: HR=90 SpO2=98% Fall=False
+[2026-03-13 11:40:23,346] INFO - [DATA] phuc_dev: HR=73 SpO2=97% Fall=False
+[2026-03-13 11:40:23,346] INFO - [DATA] user_001: HR=91 SpO2=98% Fall=False
+[2026-03-13 11:40:28,358] INFO - [DATA] phuc_dev: HR=77 SpO2=98% Fall=False
+[2026-03-13 11:40:28,358] INFO - [DATA] user_001: HR=89 SpO2=99% Fall=False
+[2026-03-13 11:40:33,366] INFO - [DATA] phuc_dev: HR=73 SpO2=97% Fall=False
+[2026-03-13 11:40:33,366] INFO - [DATA] user_001: HR=88 SpO2=99% Fall=False
+[2026-03-13 11:40:33,616] INFO - [STOP] Bot stopped
+[2026-03-13 11:41:39,556] WARNING - Alert sent: SpO2 low for phuc_dev
+[2026-03-13 11:41:45,288] WARNING - Alert sent: SpO2 low for phuc_dev
+[2026-03-13 11:41:51,009] WARNING - Alert sent: SpO2 low for phuc_dev
+[2026-03-13 11:42:54,736] INFO - ============================================================
+[2026-03-13 11:42:54,736] INFO - [BOT] IOT HEALTH MONITORING BOT (TEST MODE)
+[2026-03-13 11:42:54,736] INFO - ============================================================
+[2026-03-13 11:42:54,736] INFO - [CONFIG]
+[2026-03-13 11:42:54,736] INFO -    - Thiet bi: phuc_dev, user_001
+[2026-03-13 11:42:54,736] INFO -    - Cap nhat moi: 5s
+[2026-03-13 11:42:54,736] INFO -    - Telegram Bot: [OK] Ket noi
+[2026-03-13 11:42:54,736] INFO - ============================================================
+[2026-03-13 11:42:54,736] INFO - [DATA] phuc_dev: HR=81 SpO2=100% Fall=False
+[2026-03-13 11:42:54,736] INFO - [START] Monitoring started. Press Ctrl+C to stop.
+[2026-03-13 11:42:55,502] INFO - [MSG SENT] phuc_dev -> Telegram
+[2026-03-13 11:42:55,503] INFO - [DATA] user_001: HR=67 SpO2=100% Fall=False
+[2026-03-13 11:44:46,326] INFO - ============================================================
+[2026-03-13 11:44:46,326] INFO - [BOT] IOT HEALTH MONITORING BOT (TEST MODE)
+[2026-03-13 11:44:46,326] INFO - ============================================================
+[2026-03-13 11:44:46,326] INFO - [CONFIG]
+[2026-03-13 11:44:46,326] INFO -    - Thiet bi: phuc_dev, user_001
+[2026-03-13 11:44:46,326] INFO -    - Cap nhat moi: 5s
+[2026-03-13 11:44:46,326] INFO -    - Telegram Bot: [OK] Ket noi
+[2026-03-13 11:44:46,326] INFO - ============================================================
+[2026-03-13 11:44:46,327] INFO - [DATA] phuc_dev: HR=72 SpO2=95% Fall=False
+[2026-03-13 11:44:46,327] INFO - [START] Monitoring started. Press Ctrl+C to stop.
+[2026-03-13 11:44:47,206] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:44:47,208] INFO - [MSG SENT] phuc_dev -> Telegram
+[2026-03-13 11:44:47,209] INFO - [DATA] user_001: HR=61 SpO2=95% Fall=False
+[2026-03-13 11:44:47,928] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:44:47,929] INFO - [MSG SENT] user_001 -> Telegram
+[2026-03-13 11:44:52,934] INFO - [DATA] phuc_dev: HR=77 SpO2=94% Fall=False
+[2026-03-13 11:44:53,704] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:44:53,706] INFO - [MSG SENT] phuc_dev -> Telegram
+[2026-03-13 11:44:53,706] INFO - [DATA] user_001: HR=59 SpO2=95% Fall=False
+[2026-03-13 11:44:54,466] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:44:54,468] INFO - [MSG SENT] user_001 -> Telegram
+[2026-03-13 11:44:59,478] INFO - [DATA] phuc_dev: HR=77 SpO2=93% Fall=False
+[2026-03-13 11:45:00,173] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:45:00,174] INFO - [MSG SENT] phuc_dev -> Telegram
+[2026-03-13 11:45:00,174] ERROR - [SOS] FALL DETECTED: phuc_dev
+[2026-03-13 11:45:03,016] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:45:03,719] INFO - [SOS SENT] phuc_dev -> Telegram
+[2026-03-13 11:45:03,720] INFO - [DATA] user_001: HR=62 SpO2=96% Fall=False
+[2026-03-13 11:45:04,424] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:45:04,426] INFO - [MSG SENT] user_001 -> Telegram
+[2026-03-13 11:45:09,428] INFO - [DATA] phuc_dev: HR=81 SpO2=92% Fall=False
+[2026-03-13 11:45:10,319] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:45:10,320] INFO - [MSG SENT] phuc_dev -> Telegram
+[2026-03-13 11:45:10,321] INFO - [DATA] user_001: HR=61 SpO2=97% Fall=False
+[2026-03-13 11:45:11,019] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:45:11,020] INFO - [MSG SENT] user_001 -> Telegram
+[2026-03-13 11:45:16,021] INFO - [DATA] phuc_dev: HR=85 SpO2=92% Fall=False
+[2026-03-13 11:45:16,746] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:45:16,747] INFO - [MSG SENT] phuc_dev -> Telegram
+[2026-03-13 11:45:16,748] INFO - [DATA] user_001: HR=62 SpO2=97% Fall=False
+[2026-03-13 11:45:17,443] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:45:17,444] INFO - [MSG SENT] user_001 -> Telegram
+[2026-03-13 11:45:22,448] INFO - [DATA] phuc_dev: HR=86 SpO2=92% Fall=False
+[2026-03-13 11:45:23,252] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:45:23,254] INFO - [MSG SENT] phuc_dev -> Telegram
+[2026-03-13 11:45:23,254] INFO - [DATA] user_001: HR=59 SpO2=96% Fall=False
+[2026-03-13 11:45:24,038] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:45:24,039] INFO - [MSG SENT] user_001 -> Telegram
+[2026-03-13 11:45:24,511] INFO - [STOP] Bot stopped
+[2026-03-13 11:48:19,307] WARNING - [WARNING] Firebase khong co: The default Firebase app does not exist. Make sure to initialize the SDK by calling initialize_app().
+[2026-03-13 11:48:19,307] INFO - [MODE] Chay o test mode (khong Firebase)
+[2026-03-13 11:48:19,307] INFO - ============================================================
+[2026-03-13 11:48:19,307] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 11:48:19,307] INFO - ============================================================
+[2026-03-13 11:48:19,307] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 11:48:19,307] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 11:48:19,308] INFO - ============================================================
+[2026-03-13 11:48:19,308] ERROR - [ERROR] Firebase khong co. Vui long cau hinh Firebase credentials!
+[2026-03-13 11:50:19,581] WARNING - [WARNING] Firebase khong co: The default Firebase app does not exist. Make sure to initialize the SDK by calling initialize_app().
+[2026-03-13 11:50:19,581] INFO - [MODE] Chay o test mode (khong Firebase)
+[2026-03-13 11:50:19,581] INFO - ============================================================
+[2026-03-13 11:50:19,581] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 11:50:19,581] INFO - ============================================================
+[2026-03-13 11:50:19,581] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 11:50:19,582] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 11:50:19,582] INFO - ============================================================
+[2026-03-13 11:50:19,582] ERROR - [ERROR] Firebase khong co. Vui long cau hinh Firebase credentials!
+[2026-03-13 11:50:46,512] WARNING - [WARNING] Firebase khong co: The default Firebase app does not exist. Make sure to initialize the SDK by calling initialize_app().
+[2026-03-13 11:50:46,512] INFO - [MODE] Chay o test mode (khong Firebase)
+[2026-03-13 11:50:46,512] INFO - ============================================================
+[2026-03-13 11:50:46,512] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 11:50:46,512] INFO - ============================================================
+[2026-03-13 11:50:46,512] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 11:50:46,512] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 11:50:46,512] INFO - ============================================================
+[2026-03-13 11:50:46,512] ERROR - [ERROR] Firebase khong co. Vui long cau hinh Firebase credentials!
+[2026-03-13 11:51:56,632] WARNING - [WARNING] Firebase khong co: The default Firebase app does not exist. Make sure to initialize the SDK by calling initialize_app().
+[2026-03-13 11:51:56,633] INFO - [MODE] Chay o test mode (khong Firebase)
+[2026-03-13 11:51:56,633] INFO - ============================================================
+[2026-03-13 11:51:56,633] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 11:51:56,633] INFO - ============================================================
+[2026-03-13 11:51:56,633] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 11:51:56,633] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 11:51:56,633] INFO - ============================================================
+[2026-03-13 11:51:56,633] ERROR - [ERROR] Firebase khong co. Vui long cau hinh Firebase credentials!
+[2026-03-13 11:52:17,143] INFO - [FIREBASE] Da ket noi Firebase Firestore
+[2026-03-13 11:52:17,144] INFO - ============================================================
+[2026-03-13 11:52:17,144] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 11:52:17,144] INFO - ============================================================
+[2026-03-13 11:52:17,144] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 11:52:17,144] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 11:52:17,144] INFO - ============================================================
+[2026-03-13 11:52:17,144] INFO - [LISTEN] Dang theo doi: health_monitoring (fall detection)...
+[2026-03-13 11:52:17,168] INFO - [LISTEN] Dang theo doi: logs (health alerts)...
+[2026-03-13 11:52:17,169] INFO - [LISTEN] Dang theo doi: health_monitoring (devices)...
+[2026-03-13 11:52:17,170] INFO - [START] Listening started. Press Ctrl+C to stop.
+[2026-03-13 11:52:17,787] ERROR - [ERROR] Listen devices: unsupported operand type(s) for -: 'int' and 'DatetimeWithNanoseconds'
+[2026-03-13 11:52:18,489] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:52:18,489] INFO - [ALERT SENT] YgUQlxwuhQcH7qySiGT1 -> Telegram
+[2026-03-13 11:52:31,095] INFO - [STOP] Listener stopped
+[2026-03-13 11:52:32,603] INFO - [FIREBASE] Da ket noi Firebase Firestore
+[2026-03-13 11:52:32,603] INFO - ============================================================
+[2026-03-13 11:52:32,603] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 11:52:32,603] INFO - ============================================================
+[2026-03-13 11:52:32,603] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 11:52:32,603] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 11:52:32,603] INFO - ============================================================
+[2026-03-13 11:52:32,603] INFO - [LISTEN] Dang theo doi: health_monitoring (fall detection)...
+[2026-03-13 11:52:32,613] INFO - [LISTEN] Dang theo doi: logs (health alerts)...
+[2026-03-13 11:52:32,613] INFO - [LISTEN] Dang theo doi: health_monitoring (devices)...
+[2026-03-13 11:52:32,614] INFO - [START] Listening started. Press Ctrl+C to stop.
+[2026-03-13 11:52:33,155] ERROR - [ERROR] Listen devices: unsupported operand type(s) for -: 'int' and 'DatetimeWithNanoseconds'
+[2026-03-13 11:52:33,963] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:52:33,964] INFO - [ALERT SENT] YgUQlxwuhQcH7qySiGT1 -> Telegram
+[2026-03-13 11:53:19,806] ERROR - [ERROR] Listen devices: unsupported operand type(s) for -: 'int' and 'DatetimeWithNanoseconds'
+[2026-03-13 11:53:24,596] ERROR - [ERROR] Listen devices: unsupported operand type(s) for -: 'int' and 'DatetimeWithNanoseconds'
+[2026-03-13 11:53:30,596] ERROR - [ERROR] Listen devices: unsupported operand type(s) for -: 'int' and 'DatetimeWithNanoseconds'
+[2026-03-13 11:53:36,593] ERROR - [ERROR] Listen devices: unsupported operand type(s) for -: 'int' and 'DatetimeWithNanoseconds'
+[2026-03-13 11:53:43,007] ERROR - [ERROR] Listen devices: unsupported operand type(s) for -: 'int' and 'DatetimeWithNanoseconds'
+[2026-03-13 11:53:48,598] ERROR - [ERROR] Listen devices: unsupported operand type(s) for -: 'int' and 'DatetimeWithNanoseconds'
+[2026-03-13 11:53:54,589] ERROR - [ERROR] Listen devices: unsupported operand type(s) for -: 'int' and 'DatetimeWithNanoseconds'
+[2026-03-13 11:54:44,830] INFO - [FIREBASE] Da ket noi Firebase Firestore
+[2026-03-13 11:54:44,831] INFO - ============================================================
+[2026-03-13 11:54:44,831] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 11:54:44,831] INFO - ============================================================
+[2026-03-13 11:54:44,831] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 11:54:44,831] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 11:54:44,832] INFO - ============================================================
+[2026-03-13 11:54:44,832] INFO - [LISTEN] Dang theo doi: health_monitoring (fall detection)...
+[2026-03-13 11:54:44,842] INFO - [LISTEN] Dang theo doi: logs (health alerts)...
+[2026-03-13 11:54:44,842] INFO - [LISTEN] Dang theo doi: health_monitoring (devices)...
+[2026-03-13 11:54:44,844] INFO - [START] Listening started. Press Ctrl+C to stop.
+[2026-03-13 11:54:46,135] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:54:46,136] INFO - [ALERT SENT] PfuHCUA36s19sABdSAVO -> Telegram
+[2026-03-13 11:54:46,939] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:54:46,940] INFO - [ALERT SENT] YgUQlxwuhQcH7qySiGT1 -> Telegram
+[2026-03-13 11:56:23,855] INFO - [STOP] Listener stopped
+[2026-03-13 11:56:40,405] INFO - [FIREBASE] Da ket noi Firebase Firestore
+[2026-03-13 11:56:40,406] INFO - ============================================================
+[2026-03-13 11:56:40,406] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 11:56:40,406] INFO - ============================================================
+[2026-03-13 11:56:40,406] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 11:56:40,406] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 11:56:40,406] INFO - ============================================================
+[2026-03-13 11:56:40,406] INFO - [LISTEN] Dang theo doi: health_monitoring (fall detection)...
+[2026-03-13 11:56:40,416] INFO - [LISTEN] Dang theo doi: logs (health alerts)...
+[2026-03-13 11:56:40,417] INFO - [LISTEN] Dang theo doi: health_monitoring (devices)...
+[2026-03-13 11:56:40,418] INFO - [START] Listening started. Press Ctrl+C to stop.
+[2026-03-13 11:56:41,721] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:56:41,722] INFO - [ALERT SENT] PfuHCUA36s19sABdSAVO -> Telegram
+[2026-03-13 11:56:42,496] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:56:42,498] INFO - [ALERT SENT] YgUQlxwuhQcH7qySiGT1 -> Telegram
+[2026-03-13 11:58:06,203] INFO - [FIREBASE] Da ket noi Firebase Firestore
+[2026-03-13 11:58:06,203] INFO - ============================================================
+[2026-03-13 11:58:06,203] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 11:58:06,203] INFO - ============================================================
+[2026-03-13 11:58:06,203] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 11:58:06,203] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 11:58:06,204] INFO - ============================================================
+[2026-03-13 11:58:06,204] INFO - [LISTEN] Dang theo doi: health_monitoring (fall detection)...
+[2026-03-13 11:58:06,214] INFO - [LISTEN] Dang theo doi: logs (health alerts)...
+[2026-03-13 11:58:06,215] INFO - [LISTEN] Dang theo doi: health_monitoring (devices)...
+[2026-03-13 11:58:06,217] INFO - [START] Listening started. Press Ctrl+C to stop.
+[2026-03-13 11:58:48,710] INFO - [FIREBASE] Da ket noi Firebase Firestore
+[2026-03-13 11:58:48,710] INFO - ============================================================
+[2026-03-13 11:58:48,710] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 11:58:48,710] INFO - ============================================================
+[2026-03-13 11:58:48,711] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 11:58:48,711] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 11:58:48,711] INFO - ============================================================
+[2026-03-13 11:58:48,711] INFO - [LISTEN] Dang theo doi: health_monitoring (fall detection)...
+[2026-03-13 11:58:48,720] INFO - [LISTEN] Dang theo doi: logs (health alerts)...
+[2026-03-13 11:58:48,721] INFO - [LISTEN] Dang theo doi: health_monitoring (devices)...
+[2026-03-13 11:58:48,722] INFO - [START] Listening started. Press Ctrl+C to stop.
+[2026-03-13 11:58:49,304] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 11:58:50,016] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:58:50,018] INFO - [ALERT SENT] PfuHCUA36s19sABdSAVO -> Telegram
+[2026-03-13 11:58:50,018] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 11:58:50,886] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 11:58:50,888] INFO - [ALERT SENT] YgUQlxwuhQcH7qySiGT1 -> Telegram
+[2026-03-13 11:59:59,433] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 12:00:00,126] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:00:00,128] INFO - [ALERT SENT] 7zFH2BoWiODra9V0nmFj -> Telegram
+[2026-03-13 12:00:00,171] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:00:00,172] INFO - [ALERT SENT] 7zFH2BoWiODra9V0nmFj -> Telegram
+[2026-03-13 12:01:30,707] INFO - [FIREBASE] Da ket noi Firebase Firestore
+[2026-03-13 12:01:30,708] INFO - ============================================================
+[2026-03-13 12:01:30,708] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 12:01:30,708] INFO - ============================================================
+[2026-03-13 12:01:30,708] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 12:01:30,708] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 12:01:30,708] INFO - ============================================================
+[2026-03-13 12:01:30,708] INFO - [LISTEN] Dang theo doi: health_monitoring (fall detection)...
+[2026-03-13 12:01:30,718] INFO - [LISTEN] Dang theo doi: logs (health alerts)...
+[2026-03-13 12:01:30,719] INFO - [LISTEN] Dang theo doi: health_monitoring (devices)...
+[2026-03-13 12:01:30,720] INFO - [START] Listening started. Press Ctrl+C to stop.
+[2026-03-13 12:01:31,278] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 12:01:33,415] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:01:34,153] INFO - [LOCATION SENT] 10.7748745, 106.6296048 -> Telegram
+[2026-03-13 12:01:34,154] INFO - [ALERT SENT] 7zFH2BoWiODra9V0nmFj -> Telegram
+[2026-03-13 12:01:34,154] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 12:01:35,536] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:01:36,253] INFO - [LOCATION SENT] 10.8411, 106.6531 -> Telegram
+[2026-03-13 12:01:36,253] INFO - [ALERT SENT] PfuHCUA36s19sABdSAVO -> Telegram
+[2026-03-13 12:01:36,254] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 12:01:38,619] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:01:39,536] INFO - [LOCATION SENT] 10.7749327, 106.6296391 -> Telegram
+[2026-03-13 12:01:39,536] INFO - [ALERT SENT] YgUQlxwuhQcH7qySiGT1 -> Telegram
+[2026-03-13 12:02:50,685] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 12:02:50,698] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 12:02:52,955] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:02:53,146] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:02:53,147] INFO - [ALERT SENT] 7dbgH6qf3gzxqd5KSUoZ -> Telegram
+[2026-03-13 12:02:53,187] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:02:53,188] INFO - [ALERT SENT] 7dbgH6qf3gzxqd5KSUoZ -> Telegram
+[2026-03-13 12:02:53,652] INFO - [LOCATION SENT] 10.7748964, 106.6296359 -> Telegram
+[2026-03-13 12:02:53,652] INFO - [ALERT SENT] 7dbgH6qf3gzxqd5KSUoZ -> Telegram
+[2026-03-13 12:04:19,292] INFO - [FIREBASE] Da ket noi Firebase Firestore
+[2026-03-13 12:04:19,293] INFO - ============================================================
+[2026-03-13 12:04:19,293] INFO - [BOT] IOT FIREBASE LISTENER MODE
+[2026-03-13 12:04:19,293] INFO - ============================================================
+[2026-03-13 12:04:19,293] INFO - [CONFIG] Nghe real-time alerts tu Firestore
+[2026-03-13 12:04:19,293] INFO - [TELEGRAM] Bot da ket noi
+[2026-03-13 12:04:19,293] INFO - ============================================================
+[2026-03-13 12:04:19,293] INFO - [LISTEN] Dang theo doi: health_monitoring (fall detection)...
+[2026-03-13 12:04:19,302] INFO - [LISTEN] Dang theo doi: logs (health alerts)...
+[2026-03-13 12:04:19,303] INFO - [LISTEN] Dang theo doi: health_monitoring (devices)...
+[2026-03-13 12:04:19,304] INFO - [START] Listening started. Press Ctrl+C to stop.
+[2026-03-13 12:04:19,895] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 12:04:21,361] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:04:21,362] INFO - [ALERT SENT] 7dbgH6qf3gzxqd5KSUoZ -> Telegram
+[2026-03-13 12:04:21,363] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 12:04:23,029] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:04:23,030] INFO - [ALERT SENT] 7zFH2BoWiODra9V0nmFj -> Telegram
+[2026-03-13 12:04:23,030] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 12:04:23,726] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:04:23,726] INFO - [ALERT SENT] PfuHCUA36s19sABdSAVO -> Telegram
+[2026-03-13 12:04:23,728] INFO - [LOG] New incident: Phát hiện té ngã! - phuc_dev
+[2026-03-13 12:04:25,376] INFO - [SENT] Tin nhan Telegram da gui
+[2026-03-13 12:04:25,378] INFO - [ALERT SENT] YgUQlxwuhQcH7qySiGT1 -> Telegram
+[2026-03-13 12:04:39,102] INFO - [STOP] Listener stopped
