@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏥 Hệ thống Giám sát Sức khỏe IoT & AI (v4)
 
-## Getting Started
+Chào mừng đội ngũ phát triển! Đây là kho lưu trữ trung tâm cho toàn bộ hệ thống (Web Admin, AI Server, Telegram Bot).
 
-First, run the development server:
+## 🏗️ Kiến trúc Hệ thống
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```mermaid
+graph TD
+    subgraph "Thiết bị & Người dùng"
+        Watch["⌚ SmartWatch (ESP32)"]
+        User["📱 Mobile App (Android)"]
+    end
+
+    subgraph "Xử lý & Lưu trữ"
+        AI["🤖 AI Server (FastAPI)"]
+        Firebase["🔥 Firebase Firestore"]
+    end
+
+    subgraph "Giám sát & Cảnh báo"
+        Web["💻 Web Admin (Next.js)"]
+        Bot["🤖 Telegram Bot (Python)"]
+        Tele["📢 Telegram User"]
+    end
+
+    Watch -- "BLE (HR, SpO2, Fall)" --> User
+    User -- "HTTP POST (Predict)" --> AI
+    AI -- "Advice & Status" --> User
+    User -- "Sync Data" --> Firebase
+    Firebase -- "Real-time Update" --> Web
+    Firebase -- "Listen Changes" --> Bot
+    Bot -- "Alert Message" --> Tele
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📂 Cấu trúc Thư mục
+- `/src`: Web Admin Dashboard (Next.js + Tailwind).
+- `/ai-server`: Server AI phân tích (FastAPI + Scikit-learn).
+- `/bot`: Telegram Bot lắng nghe cảnh báo thời gian thực.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ⚙️ Hướng dẫn Chạy (Quick Start)
 
-## Learn More
+### 1. AI Server
+```bash
+cd ai-server
+# Cài đặt thư viện: pandas, joblib, fastapi, uvicorn, scikit-learn
+python -m uvicorn main:app --host 0.0.0.0 --port 8999
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Telegram Bot
+```bash
+cd bot
+# Yêu cầu file serviceAccountKey.json từ Firebase
+python firebase_listener.py
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 3. Web Admin
+```bash
+npm install
+npm run dev
+# Truy cập: localhost:3000
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🚩 Lưu ý quan trọng cho Team
+1.  **Mô hình v4**: Đang sử dụng 8 features, nếu thay đổi Feature Engineering trong `main.py` hãy báo lại cho team AI.
+2.  **Cổng mạng**: App di động hiện mặc định gọi vào cổng `8999`. Đừng thay đổi cổng nếu không cập nhật code App.
+3.  **Hàng rào an toàn (Safeguard)**: AI có bộ lọc đè kết quả nếu chỉ số quá đẹp (HR 60-95, SpO2 > 96%) để tránh báo động giả, NHƯNG sẽ luôn ưu tiên cảnh báo TÉ NGÃ.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+*Chúc team phát triển dự án thành công!* 🚀🏥

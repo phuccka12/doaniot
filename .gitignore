@@ -39,3 +39,18 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Python / AI / IoT
+venv/
+.venv/
+__pycache__/
+*.pyc
+ai-server/health_ai_super_pro*.pkl
+bot/serviceAccountKey.json
+bot/bot.log
+.idea/
+.vscode/
+
+# Build artifacts
+dist/
+build/

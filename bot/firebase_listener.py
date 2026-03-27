@@ -5,6 +5,7 @@ Khi có người té hoặc HR/SpO2 bất thường -> Gửi Telegram ngay
 
 import sys
 import io
+import requests
 
 # Force UTF-8 encoding for console output
 if sys.stdout.encoding != 'utf-8':
@@ -57,6 +58,9 @@ class FirebaseListener:
     def __init__(self):
         self.db = db
         self.last_processed = {}  # Track processed alerts to avoid duplicates
+        self.last_alert_time = {} # Track last alert timestamp per user/event
+        self.ALERT_COOLDOWN_SECONDS = 30 # Time between consecutive alerts
+
         
     def listen_fall_detection(self):
         """
@@ -77,7 +81,16 @@ class FirebaseListener:
                         
                         # Check if fall detected
                         if data.get('fall') == True:
+                            # 🚨 ANTI-SPAM: Cooldown check
+                            current_time = time.time()
+                            cooldown_key = f"fall_{user_id}"
+                            if current_time - self.last_alert_time.get(cooldown_key, 0) < self.ALERT_COOLDOWN_SECONDS:
+                                continue # Bi qua snapshot hien tai, khong thoat ham return
+
+                                
+                            self.last_alert_time[cooldown_key] = current_time
                             logger.error(f"[SOS] TE PHAT HIEN: {user_id}")
+
                             
                             # Get user info
                             name = data.get('name', user_id)
@@ -191,7 +204,16 @@ HANH DONG NGAY:
                         
                         patient_name = data.get('patientName', user_id)
                         
+                        # 🚨 ANTI-SPAM: Cooldown check for logs
+                        current_time = time.time()
+                        cooldown_key = f"log_{user_id}_{event}"
+                        if current_time - self.last_alert_time.get(cooldown_key, 0) < self.ALERT_COOLDOWN_SECONDS:
+                            # logger.info(f"[SKIP] Bo qua log spam cho {patient_name}")
+                            continue
+                            
+                        self.last_alert_time[cooldown_key] = current_time
                         logger.info(f"[LOG] New incident: {event} - {patient_name}")
+
                         
                         # Build message
                         if event.lower() == 'fall detected' or 'te' in event.lower():
@@ -259,14 +281,18 @@ Log ID: {log_id}
                     if data.get('last_seen'):
                         try:
                             # Handle both Timestamp and seconds format
+                            current_time = int(time.time())
                             if hasattr(data['last_seen'], 'timestamp'):
                                 ts = int(data['last_seen'].timestamp())
                             elif hasattr(data['last_seen'], 'seconds'):
                                 ts = data['last_seen'].seconds
                             else:
-                                ts = int(data['last_seen'])
+                                try:
+                                    ts = int(data['last_seen'])
+                                except:
+                                    continue
                             
-                            time_ago = int(time.time()) - ts
+                            time_ago = current_time - ts
                             status = "ONLINE" if time_ago < 30 else "OFFLINE"
                             # Skip verbose logging to reduce noise
                             # logger.info(f"[DEVICE] {user_id}: {status} ({time_ago}s ago)")
@@ -282,6 +308,81 @@ Log ID: {log_id}
             collection_ref.on_snapshot(on_change)
         except Exception as e:
             logger.error(f"[ERROR] Setup devices listener failed: {e}")
+
+    def listen_ai_health_analysis(self):
+        """
+        Nghe health_monitoring
+        Moi khi data (hr, spo2, a_mag) thay doi -> Goi AI API de xac dinh status
+        Cap nhat ai_status va ai_level len Firestore
+        """
+        AI_API_URL = "http://localhost:8999/predict"
+        
+        # Cache to prevent redundant updates
+        self.last_ai_status = {}
+
+        def on_change(doc_snapshot, changes, read_time):
+            try:
+                for change in changes:
+                    # Chung ta chi quan tam den MODIFIED va ADDED
+                    if change.type.name in ['MODIFIED', 'ADDED']:
+                        doc = change.document
+                        user_id = doc.id
+                        data = doc.to_dict()
+                        
+                        hr = data.get('hr')
+                        spo2 = data.get('spo2')
+                        # Accelerometer magnitude (mac dinh 1.0 neu khong co)
+                        a_mag = data.get('a_mag', data.get('accel_mag', 1.0)) 
+                        # Lay trang thai te nga
+                        fall = data.get('fall', False)
+
+                        # Chi goi AI neu co du du lieu goc
+                        if hr is not None and spo2 is not None:
+                            try:
+                                # Goi AI Server (FastAPI)
+                                # LUU Y: Server phai dang chay o localhost:8888
+                                response = requests.post(AI_API_URL, json={
+                                    "hr": float(hr),
+                                    "spo2": float(spo2),
+                                    "a_mag": float(a_mag),
+                                    "fall": bool(fall)
+                                }, timeout=5) # Tang timeout len 5s
+                                
+                                if response.status_code == 200:
+                                    result = response.json()
+                                    if result.get('status') == 'success':
+                                        ai_status = result.get('prediction', 'Unknown')
+                                        ai_level = result.get('level', 0)
+                                        
+                                        # Tranh loop vo tan: chi update neu status thay doi
+                                        current_status = data.get('ai_status')
+                                        if current_status != ai_status:
+                                            logger.info(f"[AI ANALYSIS] User: {user_id} -> Prediction: {ai_status} (Level {ai_level})")
+                                            
+                                            self.db.collection('health_monitoring').document(user_id).update({
+                                                'ai_status': ai_status,
+                                                'ai_level': ai_level,
+                                                'ai_last_updated': firestore.SERVER_TIMESTAMP
+                                            })
+                                            
+                                            # Neu la Emergency, bot co the tu dong thong bao (tuy chon)
+                                            if ai_status == "Emergency":
+                                                logger.warning(f"[AI ALERT] EMERGENCY DETECTED FOR {user_id}!")
+                                    
+                            except requests.exceptions.ConnectionError:
+                                # Silent error neu server AI chua bat
+                                pass
+                            except Exception as e:
+                                logger.error(f"[AI ERROR] {e}")
+
+            except Exception as e:
+                logger.error(f"[ERROR] AI Listener loop: {e}")
+
+        try:
+            logger.info("[LISTEN] Dang theo doi: health_monitoring (AI Analysis)...")
+            self.db.collection('health_monitoring').on_snapshot(on_change)
+        except Exception as e:
+            logger.error(f"[ERROR] Setup AI listener failed: {e}")
 
 
 def run_firebase_listener():
@@ -302,6 +403,7 @@ def run_firebase_listener():
         listener.listen_fall_detection()
         listener.listen_health_alerts()
         listener.listen_devices()
+        listener.listen_ai_health_analysis()
         
         logger.info("[START] Listening started. Press Ctrl+C to stop.")
         
