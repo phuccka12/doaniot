@@ -41,9 +41,10 @@ graph TD
 ## ⚙️ Hướng dẫn Chạy (Quick Start)
 
 ### 1. AI Server
+Xem chi tiết tại [ai-server/README.md](file:///d:/DoanIot/ai-server/README.md).
+**Lưu ý**: File model AI (`.pkl`) không được push lên Git. **Liên hệ: PHÚC** để lấy file.
 ```bash
 cd ai-server
-# Cài đặt thư viện: pandas, joblib, fastapi, uvicorn, scikit-learn
 python -m uvicorn main:app --host 0.0.0.0 --port 8999
 ```
 
