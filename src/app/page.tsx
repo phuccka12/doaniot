@@ -2,8 +2,17 @@
 import { useState, useEffect, useMemo } from "react";
 import { collection, doc, onSnapshot, query, orderBy, limit, addDoc, updateDoc, setDoc, serverTimestamp, where } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { Heart, Activity, AlertCircle, MapPin, LayoutDashboard, Bell, Clock, Navigation, Zap, ZapOff, Phone, Download } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { 
+  Heart, Activity, AlertCircle, MapPin, LayoutDashboard, Bell, 
+  Clock, Navigation, Zap, ZapOff, Phone, Download, Footprints,
+  Users, Shield, Settings, Info, Search, Menu, X, ChevronRight,
+  TrendingUp, BarChart3, Radio, Sun, Moon, AlertTriangle
+} from "lucide-react";
+import { 
+  AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer, BarChart, Bar 
+} from 'recharts';
+import { motion, AnimatePresence } from "framer-motion";
 import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
 import { exportWeeklyReport } from "../lib/pdfExport";
@@ -18,8 +27,6 @@ import { useMap } from "react-leaflet";
 // 🔴 TẠO CHẤM ĐỎ NHẤP NHÁY
 const createRedDot = () => {
   if (typeof window === 'undefined') return null;
-  // require leaflet only on client to avoid SSR window errors
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const L = require('leaflet');
   return L.divIcon({
     className: "custom-red-dot",
@@ -37,7 +44,6 @@ function RecenterMap({ lat, lng }: { lat: number, lng: number }) {
   const map = (useMap as any)();
   useEffect(() => {
     if (lat && lng) {
-      // Smoothly animate the map to the new location instead of snapping
       if (map && typeof map.flyTo === 'function') {
         map.flyTo([lat, lng], map.getZoom(), { animate: true, duration: 1.5 });
       } else {
@@ -48,7 +54,7 @@ function RecenterMap({ lat, lng }: { lat: number, lng: number }) {
   return null;
 }
 
-export default function RealAdminDashboard() {
+export default function PremiumAdminDashboard() {
   const [userList, setUserList] = useState<any[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("phuc_dev");
   const [userData, setUserData] = useState<any>(null);
@@ -57,16 +63,16 @@ export default function RealAdminDashboard() {
   const [logs, setLogs] = useState<any[]>([]);
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState<any>({ minHr: 40, maxHr: 120, minSpO2: 90 });
-  const lastSavedRef = useMemo(() => ({ ts: 0 }), []);
+  const [isHudView, setIsHudView] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [now, setNow] = useState(Date.now());
+  const lastSavedRef = useMemo(() => ({ ts: 0 }), []);
 
-  // 1. Đồng hồ đếm giây để check Online/Offline
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // 2. Lấy danh sách thiết bị
   useEffect(() => {
     const unsubList = onSnapshot(collection(db, "health_monitoring"), (snapshot) => {
       setUserList(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -74,309 +80,580 @@ export default function RealAdminDashboard() {
     return () => unsubList();
   }, []);
 
-  // 3. Lấy dữ liệu Real-time & Cập nhật biểu đồ
   useEffect(() => {
     const unsubData = onSnapshot(doc(db, "health_monitoring", selectedUserId), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data();
         setUserData(data);
-        
-        // Cập nhật biểu đồ (giữ 15 điểm gần nhất)
         const newPoint = { 
           time: new Date().toLocaleTimeString().slice(0, 8), 
-          hr: data.hr || 0 
+          hr: data.hr || 0,
+          spo2: data.spo2 || 0
         };
-        setHrHistory(prev => [...prev.slice(-14), newPoint]);
+        setHrHistory(prev => [...prev.slice(-19), newPoint]);
       }
     });
     return () => unsubData();
   }, [selectedUserId]);
 
-  // 4. Track route locally and persist points to Firestore (throttled)
   useEffect(() => {
     if (!userData?.lat || !userData?.lng) return;
     const coord: number[] = [userData.lat, userData.lng];
-
     setHistoryCoords(prev => {
       const next = [...prev, coord];
-      return next.slice(-240); // keep last 240 points
+      return next.slice(-240);
     });
 
-    // Throttle writes to Firestore: one write per 5 seconds
     const nowTs = Date.now();
-    if (nowTs - lastSavedRef.ts > 5000) {
+    if (nowTs - lastSavedRef.ts > 10000) {
       lastSavedRef.ts = nowTs;
-      (async () => {
-        try {
-          await addDoc(collection(db, 'tracks', selectedUserId, 'points'), {
-            lat: userData.lat,
-            lng: userData.lng,
-            ts: serverTimestamp()
-          });
-        } catch (e) {
-          console.error('Failed to save track point', e);
-        }
-      })();
+      addDoc(collection(db, 'tracks', selectedUserId, 'points'), {
+        lat: userData.lat, lng: userData.lng, ts: serverTimestamp()
+      }).catch(console.error);
     }
-  }, [userData?.lat, userData?.lng, selectedUserId, userData, lastSavedRef]);
+  }, [userData?.lat, userData?.lng, selectedUserId]);
 
-  // 5. Load recent logs for selected user
   useEffect(() => {
-    const q = query(collection(db, 'logs'), where('userId', '==', selectedUserId), orderBy('timestamp', 'desc'), limit(50));
-    const unsub = onSnapshot(q, (snap) => {
-      setLogs(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    });
-    return () => unsub();
+    const q = query(collection(db, 'logs'), where('userId', '==', selectedUserId), orderBy('timestamp', 'desc'), limit(30));
+    return onSnapshot(q, (snap) => setLogs(snap.docs.map(d => ({ id: d.id, ...d.data() }))));
   }, [selectedUserId]);
 
-  // 6. Load settings for selected user (if exists)
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'settings', selectedUserId), (snap) => {
       if (snap.exists()) setSettings(snap.data());
-    }, (err) => {
-      // ignore
-    });
+    }, (err) => console.error(err));
     return () => unsub();
   }, [selectedUserId]);
 
-  // --- HELPERS ---
-  const checkOnline = (u: any) => {
-    if (!u?.last_seen) return false;
-    return (now - u.last_seen.seconds * 1000) < 30000; // < 30s là online
-  };
-
+  const checkOnline = (u: any) => u?.last_seen ? (now - u.last_seen.seconds * 1000) < 60000 : false;
   const getTimeAgo = (u: any) => {
-    if (!u?.last_seen) return "N/A";
+    if (!u?.last_seen) return "Offline";
     const diff = Math.floor((now - u.last_seen.seconds * 1000) / 1000);
-    return diff < 60 ? `${diff}s trước` : `${Math.floor(diff/60)}p trước`;
+    return diff < 60 ? `${diff}s` : `${Math.floor(diff/60)}p`;
   };
 
-  if (!userData) return <div className="h-screen bg-slate-950 flex items-center justify-center text-rose-500 font-mono animate-pulse text-2xl">INITIALIZING FULL-STACK SYSTEM...</div>;
+  const emergencyActive = useMemo(() => {
+    return userList.some(u => checkOnline(u) && (u.fall || u.ai_status === 'Emergency' || u.ai_status === 'CẢNH BÁO TÉ NGÃ'));
+  }, [userList, now]);
+
+  if (!userData && userList.length === 0) return (
+    <div className="h-screen bg-[#020617] flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent animate-pulse"></div>
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="z-10 flex flex-col items-center gap-6">
+            <div className="w-16 h-16 border-4 border-t-rose-500 border-slate-800 rounded-full animate-spin"></div>
+            <p className="text-slate-400 font-bold tracking-[0.3em] uppercase text-xs">VAA Health Hub Initializing...</p>
+        </motion.div>
+    </div>
+  );
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
+    <div className={`flex h-screen ${isDarkMode ? 'bg-[#020617] text-slate-100' : 'bg-slate-50 text-slate-900'} overflow-hidden font-sans selection:bg-rose-500/30 w-full transition-colors duration-700 relative`}>
+      {/* 🔥 SOS RED ALERT OVERLAY (GLOBAL) */}
+      {emergencyActive && (
+        <div className="absolute inset-0 z-[9999] pointer-events-none border-[20px] border-rose-600/30 animate-[pulse_1.5s_infinite]">
+          <div className="absolute inset-0 bg-rose-900/10 backdrop-blur-[2px]"></div>
+        </div>
+      )}
       
-      {/* SIDEBAR */}
-      <aside className="w-72 bg-slate-900 border-r border-slate-800 flex flex-col shadow-2xl z-20">
-        <div className="p-6 border-b border-slate-800 bg-slate-900/50">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 bg-rose-500/10 rounded-lg"><Zap size={18} className="text-rose-500"/></div>
-            <h2 className="text-xl font-black tracking-tighter uppercase">VAA Admin</h2>
+      {/* 🔮 GLASS SIDEBAR */}
+      <aside className={`w-80 ${isDarkMode ? 'bg-slate-900/50' : 'bg-white/80'} backdrop-blur-2xl border-r ${isDarkMode ? 'border-white/5' : 'border-slate-200'} flex flex-col z-30 shadow-[4px_0_24px_rgba(0,0,0,0.5)]`}>
+        <div className="p-8 pb-4">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="p-3 bg-gradient-to-br from-rose-500 to-rose-700 rounded-2xl shadow-[0_0_20px_rgba(244,63,94,0.3)]">
+              <Shield size={24} className="text-white drop-shadow-md"/>
+            </div>
+            <div>
+              <h1 className="text-2xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">VAA ADMIN</h1>
+              <p className="text-[10px] text-rose-500 font-black tracking-[0.2em] uppercase">Security Dashboard</p>
+            </div>
           </div>
-          <p className="text-[10px] text-slate-500 font-bold tracking-[0.2em] pl-1">SAFETY IOT ECOSYSTEM</p>
         </div>
 
-        <nav className="flex-1 p-4 overflow-y-auto space-y-3">
-          <p className="text-[10px] text-slate-600 font-black px-2 uppercase">Thiết bị đang chạy ({userList.length})</p>
-          {userList.map((user) => {
-            const online = checkOnline(user);
-            return (
-              <button
-                key={user.id}
-                onClick={() => setSelectedUserId(user.id)}
-                className={`flex items-center gap-3 w-full p-4 rounded-2xl transition-all duration-300 border ${selectedUserId === user.id ? 'bg-rose-500/10 border-rose-500/50 shadow-lg' : 'bg-slate-800/40 border-transparent hover:border-slate-700'}`}
-              >
-                <div className={`w-3 h-3 rounded-full ${online ? (user.fall ? 'bg-rose-500 animate-ping' : 'bg-emerald-500') : 'bg-slate-600'}`}></div>
-                <div className="flex-1 text-left">
-                  <div className={`text-sm font-bold ${selectedUserId === user.id ? 'text-white' : 'text-slate-400'}`}>{user.name || user.id}</div>
-                  <div className="text-[10px] text-slate-500 font-medium">{online ? 'Đang hoạt động' : `Lần cuối: ${getTimeAgo(user)}`}</div>
-                </div>
-              </button>
-            );
-          })}
+        <div className="px-6 py-4">
+          <div className="relative group">
+            <Search className="absolute left-4 top-3.5 text-slate-500 group-focus-within:text-rose-500 transition-colors" size={16}/>
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm thiết bị..." 
+              className="w-full bg-slate-800/40 border border-white/5 rounded-2xl py-3 pl-12 pr-4 text-xs font-medium focus:outline-none focus:border-rose-500/50 focus:bg-slate-800/60 transition-all"
+            />
+          </div>
+        </div>
+
+        <nav className="flex-1 p-4 overflow-y-auto space-y-3 custom-scrollbar">
+          <div className="flex items-center justify-between px-2 mb-2">
+            <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Thiết bị ({userList.length})</p>
+            <button onClick={() => setIsHudView(!isHudView)} className={`p-2 rounded-lg transition-all ${isHudView ? 'bg-rose-500 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}>
+              <Users size={16}/>
+            </button>
+          </div>
+          
+          <AnimatePresence mode="popLayout">
+            {userList.map((user) => {
+              const online = checkOnline(user);
+              const isEmergency = online && (user.fall || user.ai_status === 'Emergency' || user.ai_status === 'CẢNH BÁO TÉ NGÃ');
+              return (
+                <motion.button
+                  layout
+                  initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.9 }}
+                  key={user.id}
+                  onClick={() => { setSelectedUserId(user.id); setIsHudView(false); }}
+                  className={`group relative flex items-center gap-4 w-full p-4 rounded-[1.5rem] transition-all duration-500 border ${selectedUserId === user.id ? 'bg-rose-500 text-white shadow-[0_8px_32px_rgba(244,63,94,0.2)] border-rose-500' : (isDarkMode ? 'bg-transparent border-transparent hover:bg-white/5' : 'bg-transparent border-transparent hover:bg-slate-100')}`}
+                >
+                  <div className="relative">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-lg transition-transform group-hover:scale-110 ${selectedUserId === user.id ? 'bg-white/20 text-white' : (isDarkMode ? 'bg-slate-800 text-slate-500' : 'bg-slate-100 text-slate-400')}`}>
+                      {user.name?.[0] || user.id[0].toUpperCase()}
+                    </div>
+                    <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-4 ${isDarkMode ? 'border-[#020617]' : 'border-white'} ${online ? (isEmergency ? 'bg-rose-500 animate-ping' : 'bg-emerald-500') : 'bg-slate-400'}`}></div>
+                  </div>
+                  <div className="flex-1 text-left">
+                    <div className={`text-sm font-black tracking-tight ${selectedUserId === user.id ? 'text-white' : (isDarkMode ? 'text-slate-400' : 'text-slate-700')}`}>{user.name || user.id}</div>
+                    <div className={`text-[10px] ${selectedUserId === user.id ? 'text-rose-100' : 'text-slate-500'} font-bold uppercase tracking-tighter`}>
+                        {online ? 'Hoạt động' : `Lần cuối: ${getTimeAgo(user)}`}
+                    </div>
+                  </div>
+                  {isEmergency && <AlertCircle size={18} className={selectedUserId === user.id ? "text-white animate-bounce" : "text-rose-500 animate-bounce"}/>}
+                </motion.button>
+              );
+            })}
+          </AnimatePresence>
         </nav>
       </aside>
 
-      {/* MAIN CONTENT */}
+      {/* 🚀 MAIN STAGE */}
       <main className="flex-1 flex flex-col relative overflow-hidden">
         
-        {/* 🚨 SOS ALERT OVERLAY (FALL OR AI EMERGENCY) */}
-        {((userData.fall && checkOnline(userData)) || (userData.ai_status === 'Emergency' || userData.ai_status === 'CẢNH BÁO TÉ NGÃ')) && (
-          <div className="absolute inset-x-0 top-0 z-[100] bg-rose-600 text-white py-4 px-8 flex items-center justify-between animate-pulse shadow-2xl border-b-4 border-rose-800">
-            <div className="flex items-center gap-4">
-              <div className="p-2 bg-white/20 rounded-full animate-bounce"><AlertCircle size={28} /></div>
-              <div>
-                <h4 className="font-black text-xl tracking-tight">
-                  {userData.ai_status === 'Emergency' ? 'AI PHÁT HIỆN TRẠNG THÁI NGUY KỊCH!' : 'CẢNH BÁO TÉ NGÃ KHẨN CẤP!'}
-                </h4>
-                <p className="text-xs text-rose-100 font-bold">
-                  {userData.ai_status === 'Emergency' ? 'Nhịp tim/SpO2 bất thường - Cần can thiệp ngay' : 'Vị trí đã được xác định - Hãy cứu hộ ngay lập tức'}
-                </p>
-              </div>
-            </div>
-            <a 
-              href={`https://www.google.com/maps?q=${userData.lat},${userData.lng}`}
-              target="_blank"
-              className="bg-white text-rose-600 px-6 py-2 rounded-xl font-black text-sm flex items-center gap-2 hover:scale-105 transition-transform"
+        {/* 🚨 SOS ALERT OVERLAY */}
+        <AnimatePresence>
+          {emergencyActive && (
+            <motion.div 
+              initial={{ y: -100 }} animate={{ y: 0 }} exit={{ y: -100 }}
+              className="absolute inset-x-0 top-0 z-[100] bg-rose-600/95 backdrop-blur-xl text-white py-5 px-10 flex items-center justify-between shadow-[0_10px_40px_rgba(0,0,0,0.4)] border-b border-rose-500/50"
             >
-              <Navigation size={18} /> XEM VỊ TRÍ
-            </a>
-          </div>
-        )}
-
-        {/* HEADER */}
-        <header className="h-24 border-b border-slate-800 flex items-center justify-between px-10 bg-slate-950/60 backdrop-blur-xl">
-          <div className="flex items-center gap-5">
-            <div className="h-12 w-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-slate-700">
-                <LayoutDashboard className="text-rose-500" size={24} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-black text-2xl text-white tracking-tight">{userData.name}</h3>
-                <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase ${checkOnline(userData) ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-800 text-slate-500'}`}>
-                    {checkOnline(userData) ? 'Online' : 'Offline'}
-                </span>
+              <div className="flex items-center gap-6">
+                <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1 }} className="p-3 bg-white text-rose-600 rounded-2xl shadow-xl">
+                  <AlertCircle size={32} strokeWidth={3} />
+                </motion.div>
+                <div>
+                  <h4 className="font-black text-2xl tracking-tighter uppercase leading-none mb-1">CẢNH BÁO TÌNH TRẠNG KHẨN CẤP</h4>
+                  <p className="text-sm font-bold text-rose-100 opacity-80 uppercase tracking-widest">Phát hiện sự cố nghiêm trọng - Yêu trợ giúp ngay lập tức</p>
+                </div>
               </div>
-              <p className="text-[11px] text-slate-500 font-mono">UID: {selectedUserId} • Cập nhật: {getTimeAgo(userData)}</p>
-            </div>
+              <div className="flex gap-4">
+                 <button className="bg-rose-800/50 border border-white/20 px-6 py-3 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-rose-900 transition-colors">Bỏ qua</button>
+                 <button className="bg-white text-rose-600 px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all">Xử lý ngay</button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* TOP BAR */}
+        <header className={`h-28 border-b ${isDarkMode ? 'border-white/5 bg-slate-950/40' : 'border-slate-200 bg-white/60'} flex items-center justify-between px-12 backdrop-blur-3xl z-20 transition-all duration-700`}>
+          <div className="flex items-center gap-8">
+            <AnimatePresence mode="wait">
+              <motion.div key={selectedUserId} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-6">
+                <div className="h-16 w-16 rounded-[2rem] bg-gradient-to-br from-rose-500 via-rose-600 to-rose-700 flex items-center justify-center shadow-[0_10px_25px_rgba(244,63,94,0.3)] border border-white/20 scale-110">
+                  <Users className="text-white drop-shadow-lg" size={28} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h3 className={`font-black text-3xl ${isDarkMode ? 'text-white' : 'text-slate-900'} tracking-tighter`}>{userData?.name || selectedUserId}</h3>
+                    <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${checkOnline(userData) ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 'bg-slate-200 text-slate-500'}`}>
+                        {checkOnline(userData) ? 'Online' : 'Offline'}
+                    </div>
+                  </div>
+                  <div className={`flex items-center gap-4 text-xs font-bold ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} uppercase tracking-widest`}>
+                    <span className="flex items-center gap-1.5"><MapPin size={12} className="text-rose-500"/> {userData?.address || "Hồ Chí Minh, VN"}</span>
+                    <span className="flex items-center gap-1.5"><Clock size={12}/> {getTimeAgo(userData)}</span>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
           
-          <div className="flex items-center gap-8">
-            <div className="text-right">
-              <p className="text-[10px] text-slate-600 font-black uppercase tracking-widest mb-1">Liên hệ khẩn cấp</p>
-              <div className="flex items-center gap-2 text-rose-500">
-                <Phone size={16} />
-                <p className="text-xl font-black font-mono">{userData.phone}</p>
-              </div>
+          <div className="flex items-center gap-6">
+            <div className={`p-3 ${isDarkMode ? 'bg-slate-900 border-white/5' : 'bg-slate-100 border-slate-200'} shadow-[0_4px_20px_rgba(0,0,0,0.1)] border rounded-2xl flex items-center gap-4 px-6 relative overflow-hidden group transition-all`}>
+               <div className="absolute inset-0 bg-gradient-to-r from-rose-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+               <Phone size={18} className="text-rose-500 animate-pulse relative z-10"/>
+               <div className="relative z-10">
+                  <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-0.5">Hotline cứu hộ</p>
+                  <p className={`text-lg font-black font-mono ${isDarkMode ? 'text-rose-400' : 'text-rose-600'} leading-none`}>{userData?.phone || "0900-SOS-VAA"}</p>
+               </div>
             </div>
-            <button onClick={() => exportWeeklyReport(userData.name, selectedUserId, hrHistory, logs)} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-sky-600 text-white text-sm font-bold hover:bg-sky-700 transition-colors">
-              <Download size={16} /> Xuất báo cáo
-            </button>
-            <div className="relative cursor-pointer hover:scale-110 transition-transform">
-                <Bell size={24} className={userData.fall ? "text-rose-500 animate-shake" : "text-slate-600"} />
-                {userData.fall && <span className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-slate-950"></span>}
-            </div>
+            
+            <motion.button 
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} 
+              onClick={() => exportWeeklyReport(userData?.name || selectedUserId, selectedUserId, hrHistory, logs)} 
+              className="flex items-center gap-3 px-6 py-4 rounded-[1.5rem] bg-sky-600/90 text-white text-sm font-black uppercase tracking-widest hover:bg-sky-600 shadow-xl transition-all border border-sky-400/30"
+            >
+              <Download size={18} /> BC tuần
+            </motion.button>
+
+            <motion.button 
+              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              onClick={() => setIsDarkMode(!isDarkMode)} 
+              className={`p-4 rounded-2xl ${isDarkMode ? 'bg-slate-900 border-white/5 text-yellow-400' : 'bg-white border-slate-200 text-slate-600'} border shadow-lg transition-all`}
+            >
+                {isDarkMode ? <Sun size={22} /> : <Moon size={22} />}
+            </motion.button>
+
+            <motion.button 
+              animate={{ rotate: showSettings ? 90 : 0 }} 
+              onClick={() => setShowSettings(!showSettings)} 
+              className={`p-4 rounded-2xl ${isDarkMode ? 'bg-slate-900 border-white/5' : 'bg-white border-slate-200'} border text-slate-400 hover:text-white transition-all shadow-lg`}
+            >
+                <Settings size={22} />
+            </motion.button>
           </div>
         </header>
 
-        {/* Settings overlay */}
-        {showSettings && (
-          <div className="fixed right-8 top-28 w-80 bg-slate-900 border border-slate-800 rounded-lg p-4 z-50 shadow-2xl">
-            <h5 className="text-sm font-bold text-slate-200 mb-2">Device thresholds ({selectedUserId})</h5>
-            <div className="space-y-2">
-              <label className="text-xs text-slate-400">Min HR</label>
-              <input type="number" value={settings?.minHr ?? ''} onChange={(e) => setSettings((s: any) => ({...s, minHr: Number(e.target.value)}))} className="w-full p-2 bg-slate-800 border border-slate-700 rounded text-sm" />
-              <label className="text-xs text-slate-400">Max HR</label>
-              <input type="number" value={settings?.maxHr ?? ''} onChange={(e) => setSettings((s: any) => ({...s, maxHr: Number(e.target.value)}))} className="w-full p-2 bg-slate-800 border border-slate-700 rounded text-sm" />
-              <label className="text-xs text-slate-400">Min SpO2</label>
-              <input type="number" value={settings?.minSpO2 ?? ''} onChange={(e) => setSettings((s: any) => ({...s, minSpO2: Number(e.target.value)}))} className="w-full p-2 bg-slate-800 border border-slate-700 rounded text-sm" />
-              <div className="flex justify-between mt-3">
-                <button onClick={() => setShowSettings(false)} className="px-3 py-1 text-sm rounded bg-slate-800 border border-slate-700">Close</button>
-                <button onClick={async () => { try { await setDoc(doc(db, 'settings', selectedUserId), {...settings, updatedAt: serverTimestamp()}); setShowSettings(false);} catch(e){console.error(e);} }} className="px-3 py-1 text-sm rounded bg-rose-500 text-white">Save</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* DASHBOARD GRID */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-900/40 via-transparent to-transparent">
+        {/* 📊 DASHBOARD CONTENT */}
+        <div className="flex-1 overflow-y-auto p-12 custom-scrollbar relative">
+          {/* 🌈 AURORA GRADIENTS */}
+          <div className="absolute top-[-10%] right-[-5%] w-[400px] h-[400px] bg-rose-500/10 blur-[150px] rounded-full -z-10 animate-pulse"></div>
+          <div className="absolute bottom-[5%] left-[-5%] w-[300px] h-[300px] bg-sky-500/10 blur-[120px] rounded-full -z-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
           
-          {/* Top Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <MetricCard icon={<Heart className="text-rose-500"/>} label="Nhịp tim" value={userData.hr} unit="BPM" chartData={hrHistory} color="#f43f5e" />
-            <MetricCard icon={<Activity className="text-sky-400"/>} label="Nồng độ SpO2" value={userData.spo2} unit="%" color="#38bdf8" />
-            <MetricCard 
-              icon={<AlertCircle className={userData.fall ? "text-rose-500" : "text-emerald-500"}/>} 
-              label="Trạng thái AI" 
-              value={userData.ai_status} 
-              isStatus 
-              alert={userData.fall && checkOnline(userData)}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* Real-time Heart Rate Chart */}
-            <div className="lg:col-span-2 bg-slate-900/40 border border-slate-800 rounded-[2.5rem] p-8 backdrop-blur-sm">
-                <h4 className="text-xs font-black text-slate-500 mb-8 uppercase tracking-[0.2em] flex items-center gap-2">
-                    <Clock size={16} className="text-rose-500"/> BIỂU ĐỒ NHỊP TIM THEO THỜI GIAN THỰC
-                </h4>
-                <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={hrHistory}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                            <XAxis dataKey="time" hide />
-                            <YAxis domain={[40, 160]} hide />
-                            <Tooltip contentStyle={{backgroundColor: '#0f172a', border: 'none', borderRadius: '16px', fontSize: '12px'}} />
-                            <Line type="monotone" dataKey="hr" stroke="#f43f5e" strokeWidth={4} dot={{r: 4, fill: '#f43f5e'}} animationDuration={300} isAnimationActive={true} />
-                        </LineChart>
-                    </ResponsiveContainer>
+          <AnimatePresence mode="wait">
+            {isHudView ? (
+              <motion.div 
+                key="hud" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.02 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+              >
+                {userList.map(u => (
+                  <HudCard key={u.id} user={u} isOnline={checkOnline(u)} isDarkMode={isDarkMode} onSelect={() => { setSelectedUserId(u.id); setIsHudView(false); }} />
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div key="detail" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-12">
+                
+                {/* Metric Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                  <PremiumMetricCard icon={<Heart size={28} className="text-rose-500"/>} label="Nhịp tim" value={userData?.hr} unit="BPM" isDarkMode={isDarkMode} />
+                  <PremiumMetricCard icon={<Activity size={28} className="text-sky-400"/>} label="Nồng độ SpO2" value={userData?.spo2} unit="%" isDarkMode={isDarkMode} />
+                  <PremiumMetricCard icon={<Footprints size={28} className="text-emerald-400"/>} label="Hoạt động" value={userData?.steps || 0} unit="BƯỚC" isDarkMode={isDarkMode} />
+                  <PremiumMetricCard 
+                    icon={<Radio size={28} className={userData?.fall ? "text-rose-500 animate-pulse" : "text-emerald-500"}/>} 
+                    label="Trạng thái AI" 
+                    value={userData?.ai_status || "NORMAL"} 
+                    isStatus 
+                    alert={userData?.fall && checkOnline(userData)}
+                    isDarkMode={isDarkMode}
+                  />
                 </div>
-            </div>
 
-            {/* Map Section */}
-            <div className="lg:col-span-2 bg-slate-900 rounded-[2.5rem] overflow-hidden border border-slate-800 shadow-2xl relative h-[450px]">
-              <div className="absolute top-6 left-6 z-[1000] bg-slate-900/90 px-4 py-2 rounded-2xl border border-slate-700 text-[10px] font-bold font-mono shadow-2xl backdrop-blur-md">
-                <MapPin size={12} className="inline mr-2 text-rose-500 animate-bounce"/>
-                <span className="text-slate-300">{userData.lat?.toFixed(6)}, {userData.lng?.toFixed(6)}</span>
-              </div>
-              
-              <MapContainer {...({ center: [userData.lat || 10.8, userData.lng || 106.6], zoom: 16, style: { height: '100%', width: '100%' } } as any)}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                {userData.lat && userData.lng && (
-                  <>
-                    <Marker key={`marker-${userData.lat}-${userData.lng}`} position={[userData.lat, userData.lng]} icon={createRedDot() as any} />
-                    {historyCoords.length > 1 && (
-                      <Polyline key={`poly-${historyCoords.length}-${userData.lat}-${userData.lng}`} positions={historyCoords as any} pathOptions={{ color: '#38bdf8', weight: 4, opacity: 0.85 }} />
-                    )}
-                    <RecenterMap lat={userData.lat} lng={userData.lng} />
-                  </>
-                )}
-              </MapContainer>
-            </div>
-
-            {/* Recent Logs / Incident panel */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-[2.5rem] p-6 overflow-y-auto">
-                <h4 className="flex items-center gap-2 text-sm font-bold text-slate-400 mb-4 uppercase tracking-widest"><Clock size={16}/> Nhật ký cứu hộ</h4>
-                <div className="space-y-3">
-                  {logs.length > 0 ? logs.map((log) => (
-                    <div key={log.id} className="flex items-center justify-between p-3 bg-slate-800/60 rounded-md border border-slate-700">
-                      <div>
-                        <p className="text-sm font-medium">{log.event || log.title || 'Sự kiện'}</p>
-                        <p className="text-[11px] text-slate-500">{new Date((log.timestamp?.seconds || log.ts?.seconds || 0) * 1000).toLocaleString()}</p>
-                        <p className="text-[11px] text-slate-400">{log.location || ''}</p>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className={`text-[11px] font-semibold px-2 py-1 rounded ${log.status === 'Đã xử lý' ? 'text-emerald-400 bg-emerald-400/10' : 'text-rose-400 bg-rose-400/10'}`}>{log.status || 'Mới'}</span>
-                        {log.status !== 'Đã xử lý' && (
-                          <button onClick={async () => { try { await updateDoc(doc(db, 'logs', log.id), { status: 'Đã xử lý', resolvedAt: serverTimestamp() }); } catch(e){console.error(e);} }} className="text-xs px-2 py-1 rounded bg-emerald-500 text-white">Xác nhận đã cứu hộ</button>
-                        )}
-                      </div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                  
+                  {/* Real-time Analysis */}
+                  <div className="lg:col-span-2 space-y-10">
+                    <div className={`${isDarkMode ? 'bg-slate-900/40 border-white/5' : 'bg-white border-slate-200'} backdrop-blur-md border rounded-[3rem] p-10 shadow-3xl transition-all duration-700`}>
+                        <div className="flex items-center justify-between mb-10">
+                          <div>
+                            <h4 className={`text-lg font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} tracking-tight uppercase flex items-center gap-3`}>
+                                <TrendingUp size={20} className="text-rose-500"/> Phân tích nhịp tim
+                            </h4>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Dữ liệu thời gian thực được xử lý qua AI</p>
+                          </div>
+                          <div className="flex gap-2">
+                             <span className="w-3 h-3 rounded-full bg-rose-500"></span>
+                             <span className="w-3 h-3 rounded-full bg-slate-800"></span>
+                             <span className="w-3 h-3 rounded-full bg-slate-800"></span>
+                          </div>
+                        </div>
+                        <div className="h-[340px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={hrHistory}>
+                                    <defs>
+                                      <linearGradient id="colorHr" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.6}/>
+                                        <stop offset="95%" stopColor="#f43f5e" stopOpacity={0.1}/>
+                                      </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} strokeOpacity={0.5} />
+                                    <XAxis dataKey="time" hide />
+                                    <YAxis domain={[40, 160]} hide />
+                                    <Tooltip content={({ active, payload }) => {
+                                      if (active && payload && payload.length) return (
+                                        <div className="bg-slate-900 border border-white/10 p-4 rounded-2xl shadow-3xl backdrop-blur-xl">
+                                          <p className="text-[10px] text-slate-500 font-black uppercase mb-1">{payload[0].payload.time}</p>
+                                          <p className="text-xl font-black text-rose-500">{payload[0].value} <span className="text-xs text-slate-400 underline">BPM</span></p>
+                                        </div>
+                                      );
+                                      return null;
+                                    }} />
+                                    <Area type="monotone" dataKey="hr" stroke="#f43f5e" strokeWidth={5} fillOpacity={1} fill="url(#colorHr)" animationDuration={1000} />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
                     </div>
-                  )) : (
-                    <p className="text-slate-500 italic text-sm text-center py-10">Chưa có bản ghi sự cố nào.</p>
-                  )}
-                </div>
-            </div>
 
-          </div>
+                    {/* Interactive Map */}
+                    <div className={`${isDarkMode ? 'bg-slate-900' : 'bg-slate-200'} rounded-[3rem] overflow-hidden border ${isDarkMode ? 'border-white/5' : 'border-slate-200'} shadow-4xl relative h-[500px] transition-all duration-700`}>
+                      <div className="absolute top-8 left-8 z-[1000] space-y-4">
+                        <div className={`${isDarkMode ? 'bg-slate-900/90 border-white/10' : 'bg-white/90 border-slate-200'} backdrop-blur-2xl px-6 py-4 rounded-3xl border shadow-3xl flex items-center gap-4 transition-all duration-700`}>
+                          <div className="p-2 bg-rose-500/10 rounded-xl text-rose-500 animate-pulse"><MapPin size={20}/></div>
+                          <div>
+                            <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest leading-none mb-1">Toạ độ vệ tinh</p>
+                            <p className={`text-sm font-black font-mono ${isDarkMode ? 'text-white' : 'text-slate-900'} tracking-tighter`}>{userData?.lat?.toFixed(6)}, {userData?.lng?.toFixed(6)}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="absolute bottom-8 right-8 z-[1000]">
+                         <button className={`${isDarkMode ? 'bg-white text-slate-900' : 'bg-slate-900 text-white'} px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest shadow-3xl hover:opacity-90 transition-all`}>Theo dõi lộ trình</button>
+                      </div>
+                      
+                      <MapContainer {...({ center: [userData?.lat || 10.8, userData?.lng || 106.6], zoom: 16, style: { height: '100%', width: '100%' } } as any)}>
+                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        {userData?.lat && userData?.lng && (
+                          <>
+                            <Marker key={`marker-${userData.lat}-${userData.lng}`} position={[userData.lat, userData.lng]} icon={createRedDot() as any} />
+                            
+                            {/* 🌟 PREMIUM PATH TRACING (FADING TRAIL) */}
+                            {historyCoords.length > 1 && historyCoords.map((coord, i) => {
+                              if (i === 0) return null;
+                              const prevCoord = historyCoords[i - 1];
+                              const opacity = Math.max(0.1, (i / historyCoords.length) * 0.8);
+                              return (
+                                <Polyline 
+                                  key={`poly-seg-${i}`} 
+                                  positions={[prevCoord as any, coord as any]} 
+                                  pathOptions={{ color: '#f43f5e', weight: 6, opacity: opacity, lineCap: 'round', lineJoin: 'round' }} 
+                                />
+                              );
+                            })}
+                            {/* 📍 STARTING POINT MARKER */}
+                            {historyCoords.length > 0 && (
+                              <Marker 
+                                position={historyCoords[0] as any} 
+                                icon={(() => {
+                                  if (typeof window === 'undefined') return null;
+                                  const L = require('leaflet');
+                                  return L.divIcon({
+                                    className: "start-point",
+                                    html: `<div class="bg-sky-500 w-4 h-4 rounded-full border-2 border-white shadow-lg"></div>`,
+                                    iconSize: [16, 16],
+                                    iconAnchor: [8, 8]
+                                  });
+                                })() as any}
+                              />
+                            )}
+                            <RecenterMap lat={userData.lat} lng={userData.lng} />
+                          </>
+                        )}
+                      </MapContainer>
+                    </div>
+                  </div>
+
+                  {/* Right Panel: Logs & Events */}
+                  <div className="space-y-10">
+                    <div className={`${isDarkMode ? 'bg-slate-900/80 border-white/5' : 'bg-white border-slate-200 shadow-xl'} backdrop-blur-md border rounded-[3rem] p-10 flex flex-col h-[940px] transition-all duration-700`}>
+                        <div className="flex items-center justify-between mb-8">
+                          <h4 className={`flex items-center gap-3 text-lg font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} tracking-tight uppercase leading-none`}>
+                            <BarChart3 size={20} className="text-sky-400"/> Nhật ký cứu hộ
+                          </h4>
+                          <span className="text-[10px] font-black bg-rose-500/10 text-rose-500 border border-rose-500/20 px-3 py-1 rounded-full uppercase tracking-widest">{logs.length} bản ghi</span>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                          {logs.length > 0 ? logs.map((log) => (
+                            <motion.div 
+                              initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }}
+                              key={log.id} className="group p-6 bg-white/5 rounded-3xl border border-white/5 hover:border-rose-500/30 transition-all cursor-default"
+                            >
+                              <div className="flex items-start justify-between mb-4">
+                                <div className="p-3 bg-slate-800 rounded-2xl text-slate-400 group-hover:text-rose-500 transition-colors">
+                                   <AlertCircle size={20}/>
+                                </div>
+                                <span className={`text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${log.status === 'Đã xử lý' ? 'text-emerald-400 bg-emerald-400/10 border border-emerald-400/20' : 'text-rose-400 bg-rose-400/10 border border-rose-400/20'}`}>
+                                  {log.status || 'Mới'}
+                                </span>
+                              </div>
+                              <h5 className="text-sm font-black text-white group-hover:text-rose-400 transition-colors mb-1">{log.event || log.title || 'Phát hiện sự cố'}</h5>
+                              <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold mb-4 uppercase">
+                                 <Clock size={12}/> {new Date((log.timestamp?.seconds || log.ts?.seconds || 0) * 1000).toLocaleString()}
+                              </div>
+                              {log.status !== 'Đã xử lý' && (
+                                <motion.button 
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={async () => { 
+                                    try { 
+                                      await updateDoc(doc(db, 'logs', log.id), { status: 'Đã xử lý', resolvedAt: serverTimestamp() }); 
+                                    } catch(e){console.error(e);} 
+                                  }} 
+                                  className="w-full py-3 rounded-2xl bg-emerald-500 text-white font-black text-[10px] uppercase tracking-widest shadow-lg hover:bg-emerald-600 transition-colors"
+                                >
+                                  Xác nhận đã xử lý
+                                </motion.button>
+                              )}
+                            </motion.div>
+                          )) : (
+                            <div className="flex flex-col items-center justify-center py-20 opacity-30">
+                              <Info size={48} className="mb-4"/>
+                              <p className="font-bold text-sm tracking-widest uppercase text-center px-10">Hệ thống an toàn. Chưa phát hiện sự cố.</p>
+                            </div>
+                          )}
+                        </div>
+                    </div>
+                  </div>
+
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+
+        {/* ⚙️ SETTINGS PANEL OVERLAY */}
+        <AnimatePresence>
+          {showSettings && (
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
+              className={`fixed right-10 top-32 w-96 ${isDarkMode ? 'bg-slate-900/90 border-white/10' : 'bg-white border-slate-200 shadow-2xl'} backdrop-blur-3xl border rounded-[2.5rem] p-10 z-[200] shadow-4xl overflow-hidden transition-all duration-700`}
+            >
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-rose-500 to-sky-500"></div>
+              <h5 className={`text-xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} mb-8 tracking-tight uppercase flex items-center gap-3`}>
+                <Settings size={20} className="text-rose-500"/> Cấu hình ngưỡng
+              </h5>
+              <div className="space-y-8">
+                <div>
+                  <div className="flex justify-between items-end mb-3">
+                    <label className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Nhịp tim tối thiểu</label>
+                    <span className="text-xs font-black text-rose-400">{settings?.minHr} BPM</span>
+                  </div>
+                  <input type="range" min="30" max="100" value={settings?.minHr ?? 40} onChange={(e) => setSettings((s: any) => ({...s, minHr: Number(e.target.value)}))} className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500" />
+                </div>
+                <div>
+                  <div className="flex justify-between items-end mb-3">
+                    <label className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Nhịp tim tối đa</label>
+                    <span className="text-xs font-black text-rose-400">{settings?.maxHr} BPM</span>
+                  </div>
+                  <input type="range" min="100" max="220" value={settings?.maxHr ?? 120} onChange={(e) => setSettings((s: any) => ({...s, maxHr: Number(e.target.value)}))} className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-rose-500" />
+                </div>
+                <div>
+                  <div className="flex justify-between items-end mb-3">
+                    <label className="text-[10px] text-slate-500 font-black uppercase tracking-widest">SpO2 cảnh báo</label>
+                    <span className="text-xs font-black text-sky-400">{settings?.minSpO2}%</span>
+                  </div>
+                  <input type="range" min="70" max="98" value={settings?.minSpO2 ?? 90} onChange={(e) => setSettings((s: any) => ({...s, minSpO2: Number(e.target.value)}))} className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-400" />
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button onClick={() => setShowSettings(false)} className="flex-1 py-4 text-xs font-black uppercase tracking-widest rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all">Huỷ</button>
+                  <button 
+                    onClick={async () => { 
+                      try { 
+                        await setDoc(doc(db, 'settings', selectedUserId), {...settings, updatedAt: serverTimestamp()}); 
+                        setShowSettings(false);
+                      } catch(e){console.error(e);} 
+                    }} 
+                    className="flex-1 py-4 text-xs font-black uppercase tracking-widest rounded-2xl bg-rose-500 text-white shadow-xl hover:bg-rose-600 transition-all hover:scale-105 active:scale-95"
+                  >
+                    Lưu lại
+                  </button>
+                </div>
+
+                <div className="pt-6 border-t border-white/5 mt-6">
+                  <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-4">Chế độ kiểm thử (Bảo vệ Đồ án)</p>
+                  <button 
+                    onClick={async () => {
+                      try {
+                        await updateDoc(doc(db, "health_monitoring", selectedUserId), {
+                          fall: true,
+                          a_mag: 4.5,
+                          ai_status: "Emergency",
+                          ai_level: 3,
+                          last_seen: serverTimestamp() // Cập nhật online để Dashboard báo đỏ
+                        });
+                        setShowSettings(false); // Đóng setting cho đẹp
+                        setTimeout(async () => {
+                          await updateDoc(doc(db, "health_monitoring", selectedUserId), { 
+                            fall: false,
+                            last_seen: serverTimestamp() // Giữ Online sau khi hết té
+                          });
+                        }, 8000);
+                      } catch (err) { console.error(err); }
+                    }}
+                    className="w-full py-4 text-xs font-black uppercase tracking-widest rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-3 group"
+                  >
+                    <AlertTriangle size={16} className="group-hover:animate-bounce" /> Giả lập té ngã (SOS)
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </main>
     </div>
   );
 }
 
-// --- COMPONENT THẺ CHỈ SỐ ---
-function MetricCard({ icon, label, value, unit, isStatus = false, alert = false }: any) {
+// --- HUD CARD COMPONENT ---
+function HudCard({ user, isOnline, onSelect, isDarkMode }: any) {
+  const isEmergency = isOnline && (user.fall || user.ai_status === 'Emergency' || user.ai_status === 'CẢNH BÁO TÉ NGÃ');
+  
   return (
-    <div className={`bg-slate-900/60 border ${alert ? 'border-rose-500 bg-rose-500/5 shadow-[0_0_20px_rgba(244,63,94,0.1)]' : 'border-slate-800'} p-8 rounded-[2.5rem] transition-all duration-500 group`}>
-      <div className="flex items-center justify-between mb-6">
-        <div className={`p-3 rounded-2xl bg-slate-800 group-hover:scale-110 transition-transform`}>{icon}</div>
-        {alert && <div className="text-[9px] font-black bg-rose-600 text-white px-3 py-1 rounded-full animate-pulse tracking-tighter">SOS ACTIVE</div>}
+    <motion.div 
+      whileHover={{ y: -8, scale: 1.02 }}
+      className={`${isDarkMode ? 'bg-slate-900/60 border-white/5' : 'bg-white border-slate-200'} backdrop-blur-md border ${isEmergency ? 'border-rose-500 shadow-[0_0_30px_rgba(244,63,94,0.2)]' : 'shadow-lg'} rounded-[2.5rem] p-8 cursor-pointer transition-all duration-500 overflow-hidden relative group`}
+      onClick={onSelect}
+    >
+      <div className="flex items-center justify-between mb-8">
+        <div className={`h-14 w-14 rounded-2xl ${isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'} flex items-center justify-center font-black text-xl group-hover:bg-rose-500 group-hover:text-white transition-all`}>
+          {user.name?.[0] || user.id[0].toUpperCase()}
+        </div>
+        <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${isOnline ? (isEmergency ? 'bg-rose-600 animate-pulse text-white' : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20') : 'bg-slate-800 text-slate-500'}`}>
+           {isOnline ? (isEmergency ? 'SOS EMERGENCY' : 'ONLINE') : 'OFFLINE'}
+        </div>
       </div>
-      <div>
-        <p className="text-[10px] text-slate-500 font-black uppercase mb-2 tracking-[0.1em]">{label}</p>
-        {isStatus ? (
-          <p className={`text-2xl font-black leading-none ${value === 'Sensor Offline' ? 'text-amber-500' : (alert ? 'text-rose-500' : 'text-emerald-500')}`}>
-            {value === 'Sensor Offline' ? 'OFFLINE' : (value || 'STABLE')}
-          </p>
-        ) : (
-          <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-black text-white tracking-tighter">{value ?? '--'}</span>
-            <span className="text-slate-600 font-bold text-sm uppercase">{unit}</span>
+      
+      <h3 className={`text-xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} tracking-tight mb-1 group-hover:text-rose-400 transition-colors uppercase`}>{user.name || user.id}</h3>
+      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-6">UID: {user.id.slice(0, 8)}...</p>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div className={`p-4 ${isDarkMode ? 'bg-slate-800/40' : 'bg-slate-50'} rounded-2xl transition-colors`}>
+          <p className="text-[9px] text-slate-500 font-black uppercase mb-1">Heart Rate</p>
+          <div className="flex items-center gap-2">
+            <span className={`text-xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{user.hr || "--"}</span>
+            <span className="text-[9px] text-slate-600 font-bold">BPM</span>
           </div>
-        )}
+        </div>
+        <div className={`p-4 ${isDarkMode ? 'bg-slate-800/40' : 'bg-slate-50'} rounded-2xl transition-colors`}>
+          <p className="text-[9px] text-slate-500 font-black uppercase mb-1">SpO2</p>
+          <div className="flex items-center gap-2">
+            <span className={`text-xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{user.spo2 || "--"}</span>
+            <span className="text-[9px] text-slate-600 font-bold">%</span>
+          </div>
+        </div>
       </div>
-    </div>
+    </motion.div>
+  );
+}
+
+// --- PREMIUM METRIC CARD COMPONENT ---
+function PremiumMetricCard({ icon, label, value, unit, isStatus = false, alert = false, isDarkMode }: any) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+      className={`relative ${isDarkMode ? 'bg-slate-900/40 backdrop-blur-3xl border-white/10' : 'bg-white border-slate-200'} border ${alert ? 'border-rose-500 bg-rose-500/5 shadow-[0_0_50px_rgba(244,63,94,0.1)]' : 'shadow-[0_8px_32px_rgba(0,0,0,0.05)]'} p-10 rounded-[3rem] transition-all duration-700 group overflow-hidden`}
+    >
+      <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${label === 'Nhịp tim' ? 'from-rose-500/20' : (label === 'Nồng độ SpO2' ? 'from-sky-500/20' : 'from-emerald-500/20')} to-transparent blur-3xl opacity-0 group-hover:opacity-100 transition-opacity`}></div>
+      
+      <div className="flex items-center justify-between mb-8">
+        <div className={`p-4 rounded-[1.5rem] ${isDarkMode ? 'bg-slate-800/80 border-white/5' : 'bg-slate-50 border-slate-200'} border group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ${label === 'Nhịp tim' ? 'shadow-[0_0_20px_rgba(244,63,94,0.2)]' : ''}`}>{icon}</div>
+      </div>
+
+      <p className={`text-[10px] ${isDarkMode ? 'text-slate-500' : 'text-slate-400'} font-black uppercase mb-3 tracking-[0.2em] transition-colors`}>{label}</p>
+      
+      {isStatus ? (
+        <p className={`text-2xl font-black leading-none uppercase tracking-tighter ${value === 'Sensor Offline' ? 'text-amber-500' : (alert ? 'text-rose-500 animate-pulse' : 'text-emerald-500')}`}>
+          {value === 'Sensor Offline' ? 'OFFLINE' : (value || 'STABLE')}
+        </p>
+      ) : (
+        <div className="flex items-baseline gap-3">
+          <span className={`text-6xl font-black ${isDarkMode ? 'text-white' : 'text-slate-900'} tracking-tighter drop-shadow-sm transition-colors`}>{value ?? "--"}</span>
+          <span className={`${isDarkMode ? 'text-slate-600' : 'text-slate-400'} font-black text-sm uppercase tracking-widest transition-colors`}>{unit}</span>
+        </div>
+      )}
+    </motion.div>
   );
 }

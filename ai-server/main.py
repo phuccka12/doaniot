@@ -39,12 +39,24 @@ async def predict_health(data: HealthData):
 
     # 🚨 Ưu tiên cảnh báo Té ngã (Nếu thiết bị đã báo té)
     if data.fall:
+        # Nhãn mặc định
+        msg = "Fall Detected"
+        advice = "🚩 PHÁT HIỆN TÉ NGÃ! Hệ thống đang gửi tín hiệu cứu hộ. Hãy giữ bình tĩnh."
+        
+        # AI THẨM ĐỊNH MỨC ĐỘ NGUY HIỂM:
+        if data.a_mag > 3.0: 
+            advice = "⚠️ AI XÁC NHẬN: CÚ TÉ CHẤN THƯƠNG MẠNH! Đang gọi cấp cứu ngay lập tức."
+        elif data.hr < 50 and data.hr > 0:
+            advice = "🆘 CẢNH BÁO NGUY KỊCH: Phát hiện té ngã kèm nhịp tim yếu. Cần can thiệp gấp!"
+        elif data.a_mag < 1.1:
+            advice = "❓ Cảnh báo: Có tín hiệu té nhưng dữ liệu ổn định. Hãy xác nhận tình trạng của bạn."
+
         return {
             "prediction": "Emergency", 
-            "advice": "🚩 PHÁT HIỆN TÉ NGÃ! Hệ thống đang gửi tín hiệu cứu hộ. Hãy giữ bình tĩnh.",
+            "advice": advice,
             "level": 3,
             "status": "success",
-            "message": "Fall Detected"
+            "message": msg
         }
 
 
@@ -88,12 +100,24 @@ async def predict_health(data: HealthData):
         
         res = int(np.argmax(proba, axis=1)[0])
         
-        # MAPPING TRẠNG THÁI & LỜI KHUYÊN (Theo yêu cầu của ông)
+        # MAPPING TRẠNG THÁI & LỜI KHUYÊN PHÁT TRIỂN (Dành cho đồ án)
         status_map = {
-            0: {"prediction": "Bình thường", "advice": "Sức khỏe ổn định. Bạn đang nghỉ thực sự, hãy duy trì nhé! 🧘‍♂️"},
-            1: {"prediction": "Đang vận động", "advice": "Bạn đang hoạt động tích cực. Thật tuyệt vời! 🏃‍♂️"},
-            2: {"prediction": "Cảnh báo nhẹ", "advice": "Nhịp tim hơi cao. Bạn nên ngồi nghỉ và uống chút nước. ☕"},
-            3: {"prediction": "Emergency", "advice": "🚩 PHÁT HIỆN BẤT THƯỜNG! Hãy kiểm tra lại hoặc gọi cứu trợ."}
+            0: {
+                "prediction": "Bình thường", 
+                "advice": "Sức khỏe ổn định. Bạn nên thực hiện bài tập thở 4-7-8 (Hít 4s, giữ 7s, thở 8s) để thư giãn tim mạch. 🧘‍♂️"
+            },
+            1: {
+                "prediction": "Đang vận động", 
+                "advice": "Vận động tốt! Đừng quên bài tập xoay cổ tay và khớp vai để giảm áp lực cơ. Hãy uống thêm 200ml nước. 🏃‍♂️💧"
+            },
+            2: {
+                "prediction": "Cảnh báo nhẹ", 
+                "advice": "Nhịp tim hơi cao. Áp dụng ngay 'Box Breathing' (Hít 4s, giữ 4s, thở 4s, giữ 4s) để điều hòa lại. ☕"
+            },
+            3: {
+                "prediction": "Emergency", 
+                "advice": "🚩 NGUY CẢNH: Hãy nằm xuống nơi thoáng mát, nới lỏng trang phục. Đang gửi tín hiệu khẩn cấp!"
+            }
         }
 
         # 🚨 SAFEGUARD: Chỉ áp dụng nếu KHÔNG có té ngã và vitals quá đẹp
